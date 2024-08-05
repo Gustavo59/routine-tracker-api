@@ -1,0 +1,17 @@
+FROM python:3.11.1-slim
+
+WORKDIR /app
+
+RUN pip install -U pip &&\
+    pip install poetry &&\
+    poetry config virtualenvs.create false
+
+RUN apt-get update -qq &&\
+    apt-get install git build-essential libxml2-dev libxmlsec1-dev libxmlsec1-openssl pkg-config -qq
+
+ADD . .
+
+RUN poetry self update
+RUN poetry install
+
+ENTRYPOINT ["alembic", "upgrade", "head"]

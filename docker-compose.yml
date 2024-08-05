@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15.3
+    container_name: routine-tracker-db
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: routine_tracker
+    volumes:
+      - postgres_data_routine_tracker:/var/lib/postgresql/data
+    ports:
+      - 54321:5432
+
+  migration:
+    container_name: routine-tracker-migration
+    build: 
+      dockerfile: deploy/dockerfile.migration
+      context: .
+    environment:
+      DATABASE_URL: postgresql://test:test@routine-tracker-db:5432/routine_tracker
+    networks:
+      - default
+
+  api:
+    container_name: routine-tracker-api
+    build:
+      dockerfile: deploy/dockerfile.routine_tracker_api
+      context: .
+    environment:
+      DATABASE_URL: postgresql://test:test@routine-tracker-db:5432/routine_tracker
+    restart: always
+    ports:
+      - "8005:8000"
+    networks:
+      - default
+
+volumes:
+  postgres_data_routine_tracker:
+    external: false
